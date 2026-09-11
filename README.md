@@ -74,6 +74,3 @@ admin@royalpalm.in
 9876543210
 President Active
 Overview Dashboard
-
-
-access token : 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
