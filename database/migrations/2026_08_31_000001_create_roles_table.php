@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('organization_id')->index();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->jsonb('permissions')->nullable(); // List of permission slugs
+            $table->timestamps();
+
+            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
+            $table->unique(['organization_id', 'name']);
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->uuid('role_id')->nullable()->after('role');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('set null');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            if (Schema::hasColumn('users', 'role_id')) {
+                $table->dropForeign(['role_id']);
+                $table->dropColumn('role_id');
+            }
+        });
+
+        Schema::dropIfExists('roles');
+    }
+};
